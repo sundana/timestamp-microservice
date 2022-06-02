@@ -28,6 +28,14 @@ app.get('/api/hello', function (req, res) {
 const unixRegex = /[\d]+/
 const utcRegex = /[\d]*-[\d]*-[\d]*/
 
+app.get('/api', (req, res) => {
+    let now = new Date()
+    res.send({
+        unix: Date.parse(now),
+        utc: now.toUTCString(),
+    })
+})
+
 app.get('/api/:time', (req, res) => {
     let unix
     let utc
@@ -40,6 +48,12 @@ app.get('/api/:time', (req, res) => {
     if (utcRegex.test(req.params.time)) {
         unix = Date.parse(req.params.time)
         utc = new Date(req.params.time).toUTCString()
+    }
+
+    if (new Date(req.params.time === 'invalid date')) {
+        res.send({
+            error: 'Invalid Date',
+        })
     }
 
     res.send({
