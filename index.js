@@ -25,9 +25,6 @@ app.get('/api/hello', function (req, res) {
     res.json({ greeting: 'hello API' })
 })
 
-const unixRegex = /[\d]+/
-const utcRegex = /[\d]*-[\d]*-[\d]*/
-
 app.get('/api', (req, res) => {
     let now = new Date()
     res.send({
@@ -36,30 +33,44 @@ app.get('/api', (req, res) => {
     })
 })
 
+const regex = /[^\d]/
+
 app.get('/api/:time', (req, res) => {
+    let input = req.params.time
     let unix
     let utc
 
-    if (unixRegex.test(req.params.time)) {
-        unix = parseInt(req.params.time)
-        utc = new Date(parseInt(1451001600000)).toUTCString()
+    if (!regex.test(input)) {
+        input = new Date(parseInt(input))
+        if (input != 'Invalid Date') {
+            unix = Date.parse(input)
+            utc = input.toUTCString()
+            res.send({
+                unix,
+                utc,
+            })
+        } else {
+            res.send({
+                date: 'Invalid Date',
+            })
+        }
     }
 
-    if (utcRegex.test(req.params.time)) {
-        unix = Date.parse(req.params.time)
-        utc = new Date(req.params.time).toUTCString()
+    if (regex.test(input)) {
+        input = new Date(input)
+        if (input != 'Invalid Date') {
+            unix = Date.parse(input)
+            utc = input.toUTCString()
+            res.send({
+                unix,
+                utc,
+            })
+        } else {
+            res.send({
+                error: 'Invalid Date',
+            })
+        }
     }
-
-    if (new Date(req.params.time === 'invalid date')) {
-        res.send({
-            error: 'Invalid Date',
-        })
-    }
-
-    res.send({
-        unix,
-        utc,
-    })
 })
 
 // listen for requests :)
